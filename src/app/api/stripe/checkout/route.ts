@@ -1,5 +1,7 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
