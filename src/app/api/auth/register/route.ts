@@ -16,14 +16,14 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { name, email, password } = registerSchema.parse(body);
 
-    const existing = await prisma.user.findUnique({ where: { email } });
+    const existing = await prisma().user.findUnique({ where: { email } });
     if (existing) {
       return NextResponse.json({ error: "Email already in use" }, { status: 409 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    await prisma.user.create({
+    await prisma().user.create({
       data: { name, email, password: hashedPassword },
     });
 

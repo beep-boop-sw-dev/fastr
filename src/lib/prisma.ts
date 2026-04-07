@@ -1,25 +1,18 @@
 import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
-  _prisma: PrismaClient | undefined;
+  prisma: PrismaClient | undefined;
 };
 
-function getClient(): PrismaClient {
-  if (!globalForPrisma._prisma) {
-    globalForPrisma._prisma = new PrismaClient();
+/**
+ * Returns a lazily-initialized, singleton PrismaClient.
+ * Call this function wherever you need the client instead of
+ * importing a module-level instance (which would crash at build
+ * time when DATABASE_URL is unavailable).
+ */
+export function prisma(): PrismaClient {
+  if (!globalForPrisma.prisma) {
+    globalForPrisma.prisma = new PrismaClient();
   }
-  return globalForPrisma._prisma;
+  return globalForPrisma.prisma;
 }
-
-// Lazy proxy: defers PrismaClient instantiation until first use at runtime.
-// This prevents build-time crashes when DATABASE_URL is not set.
-export const prisma = new Proxy({} as PrismaClient, {
-  get(_target, prop) {
-    const client = getClient();
-    const val = (client as never)[prop as keyof PrismaClient];
-    if (typeof val === "function") {
-      return (val as Function).bind(client);
-    }
-    return val;
-  },
-});

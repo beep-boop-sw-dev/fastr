@@ -39,7 +39,7 @@ export async function POST(req: Request) {
         const subscription = await stripe.subscriptions.retrieve(
           session.subscription as string
         );
-        await prisma.user.update({
+        await prisma().user.update({
           where: { id: session.client_reference_id },
           data: {
             stripeCustomerId: session.customer as string,
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
         const subscription = await stripe.subscriptions.retrieve(
           invoiceSubscription as string
         );
-        await prisma.user.updateMany({
+        await prisma().user.updateMany({
           where: { stripeSubscriptionId: subscription.id },
           data: {
             stripePriceId: subscription.items.data[0].price.id,
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
 
     case "customer.subscription.updated": {
       const subscription = event.data.object as Stripe.Subscription;
-      await prisma.user.updateMany({
+      await prisma().user.updateMany({
         where: { stripeSubscriptionId: subscription.id },
         data: {
           stripePriceId: subscription.items.data[0].price.id,
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
 
     case "customer.subscription.deleted": {
       const subscription = event.data.object as Stripe.Subscription;
-      await prisma.user.updateMany({
+      await prisma().user.updateMany({
         where: { stripeSubscriptionId: subscription.id },
         data: {
           stripeSubscriptionId: null,

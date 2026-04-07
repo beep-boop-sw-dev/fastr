@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
-import { authOptions } from "@/lib/auth";
+import { getAuthOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 const updatePostSchema = z.object({
@@ -16,14 +16,14 @@ const updatePostSchema = z.object({
 });
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
   }
 
   const { id } = await params;
 
-  const post = await prisma.post.findFirst({
+  const post = await prisma().post.findFirst({
     where: { id, userId: session.user.id },
   });
 
@@ -35,7 +35,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 }
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
   }
@@ -46,7 +46,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const body = await req.json();
     const data = updatePostSchema.parse(body);
 
-    const post = await prisma.post.updateMany({
+    const post = await prisma().post.updateMany({
       where: { id, userId: session.user.id },
       data,
     });
@@ -55,7 +55,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
-    const updated = await prisma.post.findUnique({ where: { id } });
+    const updated = await prisma().post.findUnique({ where: { id } });
     return NextResponse.json(updated);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -66,14 +66,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 }
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
   }
 
   const { id } = await params;
 
-  const result = await prisma.post.deleteMany({
+  const result = await prisma().post.deleteMany({
     where: { id, userId: session.user.id },
   });
 

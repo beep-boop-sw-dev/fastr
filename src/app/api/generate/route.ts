@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
-import { authOptions } from "@/lib/auth";
+import { getAuthOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { streamBlogGeneration } from "@/lib/claude";
 import { buildSystemPrompt, buildUserPrompt } from "@/lib/prompts";
@@ -24,7 +24,7 @@ const generateSchema = z.object({
 });
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
   }
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     const input = generateSchema.parse(body);
 
     // Check usage limits
-    const user = await prisma.user.findUnique({
+    const user = await prisma().user.findUnique({
       where: { id: session.user.id },
       select: { stripePriceId: true, stripeCurrentPeriodEnd: true },
     });
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
       ? new Date(new Date(user.stripeCurrentPeriodEnd).getTime() - 30 * 24 * 60 * 60 * 1000)
       : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-    const usageCount = await prisma.usageRecord.count({
+    const usageCount = await prisma().usageRecord.count({
       where: {
         userId: session.user.id,
         createdAt: { gte: periodStart },
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
     }
 
     // Merge with practice info
-    const practiceInfo = await prisma.practiceInfo.findUnique({
+    const practiceInfo = await prisma().practiceInfo.findUnique({
       where: { userId: session.user.id },
     });
 
@@ -110,7 +110,7 @@ export async function POST(req: Request) {
           }
 
           // Record usage
-          await prisma.usageRecord.create({
+          await prisma().usageRecord.create({
             data: {
               userId: session.user.id,
               action: "generation",

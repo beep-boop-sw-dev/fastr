@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
-import { authOptions } from "@/lib/auth";
+import { getAuthOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 const createPostSchema = z.object({
@@ -24,7 +24,7 @@ const createPostSchema = z.object({
 });
 
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
   }
@@ -40,20 +40,20 @@ export async function GET(req: Request) {
   };
 
   const [posts, total] = await Promise.all([
-    prisma.post.findMany({
+    prisma().post.findMany({
       where,
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * limit,
       take: limit,
     }),
-    prisma.post.count({ where }),
+    prisma().post.count({ where }),
   ]);
 
   return NextResponse.json({ posts, total, page, pages: Math.ceil(total / limit) });
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
   }
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "");
 
-    const post = await prisma.post.create({
+    const post = await prisma().post.create({
       data: {
         ...data,
         slug,

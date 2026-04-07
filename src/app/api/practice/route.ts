@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
-import { authOptions } from "@/lib/auth";
+import { getAuthOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 const practiceSchema = z.object({
@@ -19,12 +19,12 @@ const practiceSchema = z.object({
 });
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const practiceInfo = await prisma.practiceInfo.findUnique({
+  const practiceInfo = await prisma().practiceInfo.findUnique({
     where: { userId: session.user.id },
   });
 
@@ -32,7 +32,7 @@ export async function GET() {
 }
 
 export async function PUT(req: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
   }
@@ -41,7 +41,7 @@ export async function PUT(req: Request) {
     const body = await req.json();
     const data = practiceSchema.parse(body);
 
-    const practiceInfo = await prisma.practiceInfo.upsert({
+    const practiceInfo = await prisma().practiceInfo.upsert({
       where: { userId: session.user.id },
       update: data,
       create: { ...data, userId: session.user.id },
