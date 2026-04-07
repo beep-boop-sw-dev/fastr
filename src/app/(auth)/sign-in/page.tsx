@@ -52,8 +52,8 @@ function SignInContent() {
   return (
     <Card>
       <CardHeader className="text-center">
-        <Link href="/" className="mx-auto mb-4 text-2xl font-bold text-primary">
-          Fastr
+        <Link href="/" className="mx-auto mb-4 text-2xl font-bold text-primary font-heading">
+          Clarion
         </Link>
         <CardTitle className="text-xl">Welcome back</CardTitle>
         <CardDescription>Sign in to your account to continue</CardDescription>

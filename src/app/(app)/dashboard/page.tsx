@@ -69,7 +69,7 @@ export default function DashboardPage() {
         </div>
         <Link href="/generate" className={buttonVariants()}>
           <Sparkles className="mr-2 h-4 w-4" />
-          Generate New Post
+          Create New Post
         </Link>
       </div>
 
@@ -77,7 +77,7 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Usage</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Posts This Month</CardTitle>
             <PenTool className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -88,7 +88,7 @@ export default function DashboardPage() {
               </span>
             </div>
             <Progress value={usagePercent} className="mt-2" />
-            <p className="mt-1 text-xs text-muted-foreground">Posts generated this month</p>
+            <p className="mt-1 text-xs text-muted-foreground">Posts created this month</p>
           </CardContent>
         </Card>
 
@@ -139,11 +139,11 @@ export default function DashboardPage() {
               <FileText className="mb-4 h-12 w-12 text-muted-foreground/50" />
               <p className="mb-2 text-sm font-medium">No posts yet</p>
               <p className="mb-4 text-sm text-muted-foreground">
-                Generate your first blog post to get started.
+                Create your first post to get started.
               </p>
               <Link href="/generate" className={buttonVariants()}>
                 <Sparkles className="mr-2 h-4 w-4" />
-                Generate Your First Post
+                Create Your First Post
               </Link>
             </CardContent>
           </Card>

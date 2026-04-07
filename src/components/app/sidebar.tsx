@@ -17,7 +17,7 @@ import {
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/generate", label: "Generate Post", icon: PenTool },
+  { href: "/generate", label: "Create Post", icon: PenTool },
   { href: "/posts", label: "My Posts", icon: FileText },
   { href: "/settings", label: "Settings", icon: Settings },
   { href: "/settings/billing", label: "Billing", icon: CreditCard },
@@ -30,8 +30,8 @@ export function Sidebar() {
   return (
     <aside className="flex h-full w-64 flex-col border-r bg-sidebar text-sidebar-foreground">
       <div className="flex h-16 items-center border-b px-6">
-        <Link href="/dashboard" className="text-xl font-bold text-primary">
-          Fastr
+        <Link href="/dashboard" className="text-xl font-bold text-primary font-heading">
+          Clarion
         </Link>
       </div>
 

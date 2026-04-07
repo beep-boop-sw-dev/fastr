@@ -58,11 +58,11 @@ export default function SignUpPage() {
   return (
     <Card>
       <CardHeader className="text-center">
-        <Link href="/" className="mx-auto mb-4 text-2xl font-bold text-primary">
-          Fastr
+        <Link href="/" className="mx-auto mb-4 text-2xl font-bold text-primary font-heading">
+          Clarion
         </Link>
         <CardTitle className="text-xl">Create your account</CardTitle>
-        <CardDescription>Start writing SEO-optimized blog posts today</CardDescription>
+        <CardDescription>Start publishing content that grows your practice</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Button

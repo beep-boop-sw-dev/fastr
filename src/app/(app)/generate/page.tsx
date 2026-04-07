@@ -174,8 +174,8 @@ export default function GeneratePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Generate Blog Post</h1>
-        <p className="text-muted-foreground">Fill in the details below to create an SEO-optimized blog post.</p>
+        <h1 className="text-2xl font-bold font-heading">Create New Post</h1>
+        <p className="text-muted-foreground">Share your expertise with the people who need it most.</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
@@ -193,7 +193,7 @@ export default function GeneratePage() {
                   <p className="text-sm text-muted-foreground">
                     {practiceInfo?.practiceName
                       ? `Pre-filled from settings: ${practiceInfo.practiceName}`
-                      : "Add your practice details for local SEO"}
+                      : "Add your practice details for local reach"}
                   </p>
                 </div>
                 {showPracticeFields ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -413,12 +413,12 @@ export default function GeneratePage() {
             {isGenerating ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Generating...
+                Creating...
               </>
             ) : (
               <>
                 <Sparkles className="mr-2 h-5 w-5" />
-                Generate Blog Post
+                Create Post
               </>
             )}
           </Button>
@@ -494,7 +494,7 @@ export default function GeneratePage() {
               )}
               {!content && !isGenerating && !error && (
                 <p className="text-center text-sm text-muted-foreground py-12">
-                  Fill in the form and click &quot;Generate&quot; to create your blog post.
+                  Fill in the details and click &quot;Create Post&quot; to get started.
                 </p>
               )}
               {(content || isGenerating) && (

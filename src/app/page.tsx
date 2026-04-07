@@ -5,7 +5,7 @@ import {
   PenTool,
   Search,
   MapPin,
-  Zap,
+  BookOpen,
   ArrowRight,
   Check,
   Star,
@@ -14,47 +14,47 @@ import {
 const features = [
   {
     icon: PenTool,
-    title: "AI-Powered Writing",
-    description: "Generate professional blog posts in minutes with Claude AI, trained to write in your voice and style.",
+    title: "Guided Content Creation",
+    description: "A thoughtful process that transforms your clinical expertise into polished, publish-ready blog posts that sound like you.",
   },
   {
     icon: Search,
-    title: "SEO Optimization",
-    description: "Every post is optimized for search engines with keyword targeting, meta descriptions, and proper heading structure.",
+    title: "Search Visibility",
+    description: "Content structured so potential clients can find you. Keyword targeting, clear headings, and meta descriptions built in.",
   },
   {
     icon: MapPin,
-    title: "Local SEO Targeting",
-    description: "Attract clients in your area with content optimized for your city, neighborhood, and local search terms.",
+    title: "Local Reach",
+    description: "Attract clients in your community with content tailored to your city, neighborhood, and the people you serve.",
   },
   {
-    icon: Zap,
-    title: "One-Click Publishing",
-    description: "Copy, download, or export your blog posts in seconds. Ready to paste into your website or CMS.",
+    icon: BookOpen,
+    title: "Ready to Publish",
+    description: "Review, refine, and publish with confidence. Every post is crafted to meet the standards your practice demands.",
   },
 ];
 
 const steps = [
-  { number: "1", title: "Enter Your Details", description: "Add your practice info, specialties, and preferred writing tone." },
-  { number: "2", title: "Choose Your Topic", description: "Pick a blog topic and target keywords for SEO." },
-  { number: "3", title: "Generate & Publish", description: "AI writes your post in seconds. Review, edit, and publish." },
+  { number: "1", title: "Share your practice details", description: "Your specialties, your location, your voice. We start with what makes your practice unique." },
+  { number: "2", title: "Choose your topic", description: "Select a subject that matters to your clients and the keywords that help them find you." },
+  { number: "3", title: "Review and publish", description: "Read through your post, make it yours, and share it with confidence." },
 ];
 
 const testimonials = [
   {
     name: "Dr. Sarah Chen",
     role: "Licensed Psychologist, Austin TX",
-    quote: "Fastr cut my blog writing time from 4 hours to 15 minutes. My website traffic has doubled since I started posting consistently.",
+    quote: "I finally have a consistent blog. My website traffic has doubled, and new clients tell me they found me through my articles.",
   },
   {
     name: "James Rodriguez, LMFT",
     role: "Marriage & Family Therapist, Denver CO",
-    quote: "The local SEO feature is a game-changer. I'm now ranking on the first page for 'couples therapy Denver' thanks to consistent blogging.",
+    quote: "I wanted to reach more couples in my area. Within three months of consistent blogging, I was appearing on the first page for local searches.",
   },
   {
     name: "Dr. Amara Johnson",
     role: "Clinical Social Worker, Atlanta GA",
-    quote: "As a therapist, I know what I want to say but struggle with SEO. Fastr bridges that gap perfectly.",
+    quote: "I know what I want to say to prospective clients, but turning that into blog content felt impossible. Clarion made it effortless.",
   },
 ];
 
@@ -62,25 +62,25 @@ const plans = [
   {
     name: "Free",
     price: "$0",
-    description: "Perfect for trying it out",
-    features: ["3 blog posts per month", "Short posts (500 words)", "Basic SEO scoring", "5 saved posts"],
-    cta: "Start Free",
+    description: "A place to start",
+    features: ["3 posts per month", "Short posts (500 words)", "Basic SEO scoring", "5 saved posts"],
+    cta: "Get Started",
     popular: false,
   },
   {
     name: "Pro",
     price: "$29",
-    description: "For active content creators",
-    features: ["30 blog posts per month", "All post lengths (up to 1,500 words)", "Full SEO scoring & analysis", "Unlimited saved posts"],
-    cta: "Get Pro",
+    description: "For consistent publishing",
+    features: ["30 posts per month", "All post lengths (up to 1,500 words)", "Full SEO scoring & analysis", "Unlimited saved posts"],
+    cta: "Choose Pro",
     popular: true,
   },
   {
     name: "Agency",
     price: "$79",
-    description: "For practices & agencies",
-    features: ["Unlimited blog posts", "All post lengths", "Full SEO scoring & analysis", "Unlimited saved posts"],
-    cta: "Go Agency",
+    description: "For practices and groups",
+    features: ["Unlimited posts", "All post lengths", "Full SEO scoring & analysis", "Unlimited saved posts"],
+    cta: "Choose Agency",
     popular: false,
   },
 ];
@@ -89,24 +89,24 @@ export default function HomePage() {
   return (
     <div className="flex min-h-screen flex-col">
       {/* Navigation */}
-      <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 border-b bg-[#7A9E7E] text-white">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <Link href="/" className="text-xl font-bold text-primary">
-            Fastr
+          <Link href="/" className="text-xl font-bold font-heading">
+            Clarion
           </Link>
           <nav className="hidden items-center gap-6 md:flex">
-            <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
-            <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
+            <a href="#features" className="text-sm text-white/80 hover:text-white transition-colors">Features</a>
+            <a href="#pricing" className="text-sm text-white/80 hover:text-white transition-colors">Pricing</a>
             <Link href="/sign-in">
-              <Button variant="ghost" size="sm">Sign In</Button>
+              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-white">Sign In</Button>
             </Link>
             <Link href="/sign-up">
-              <Button size="sm">Get Started Free</Button>
+              <Button size="sm" className="bg-white text-[#7A9E7E] hover:bg-white/90">Get Started</Button>
             </Link>
           </nav>
           <div className="flex items-center gap-2 md:hidden">
             <Link href="/sign-up">
-              <Button size="sm">Start Free</Button>
+              <Button size="sm" className="bg-white text-[#7A9E7E] hover:bg-white/90">Get Started</Button>
             </Link>
           </div>
         </div>
@@ -117,22 +117,22 @@ export default function HomePage() {
         <section className="relative overflow-hidden">
           <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
             <div className="mx-auto max-w-3xl text-center">
-              <div className="mb-6 inline-flex items-center rounded-full border bg-muted/50 px-4 py-1.5 text-sm">
-                <Zap className="mr-2 h-3.5 w-3.5 text-gold" />
-                AI-powered blog writing for therapists
+              <div className="mb-6 inline-flex items-center rounded-full border bg-muted/50 px-4 py-1.5 text-sm text-muted-foreground">
+                Built for health professionals
               </div>
-              <h1 className="mb-6 text-4xl font-bold tracking-tight md:text-6xl">
-                Blog posts that bring{" "}
-                <span className="text-primary">clients to your practice</span>
+              <h1 className="mb-6 text-4xl font-bold tracking-tight md:text-6xl font-heading">
+                Your expertise,{" "}
+                <span className="text-primary">published.</span>
               </h1>
-              <p className="mb-8 text-lg text-muted-foreground md:text-xl">
-                Stop spending hours writing blog posts. Fastr uses AI to create SEO-optimized content
-                that ranks in search results and attracts the right clients to your therapy practice.
+              <p className="mb-8 text-lg text-muted-foreground md:text-xl leading-relaxed">
+                You&apos;ve spent years building clinical expertise that could help people long before
+                their first session. Clarion helps you share it — with credible, professional content
+                that builds trust and grows your practice.
               </p>
               <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
                 <Link href="/sign-up">
                   <Button size="lg" className="w-full sm:w-auto">
-                    Start Writing for Free
+                    Start Publishing
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
@@ -142,9 +142,6 @@ export default function HomePage() {
                   </Button>
                 </a>
               </div>
-              <p className="mt-4 text-sm text-muted-foreground">
-                No credit card required. 3 free posts per month.
-              </p>
             </div>
           </div>
           {/* Background gradient */}
@@ -155,9 +152,9 @@ export default function HomePage() {
         <section id="features" className="border-t bg-muted/30 py-24">
           <div className="mx-auto max-w-6xl px-6">
             <div className="mb-16 text-center">
-              <h2 className="mb-4 text-3xl font-bold">Everything you need to blog consistently</h2>
+              <h2 className="mb-4 text-3xl font-bold font-heading">Everything you need to publish consistently</h2>
               <p className="text-lg text-muted-foreground">
-                Built specifically for therapy practices. No marketing degree required.
+                Designed for the way health professionals think, write, and practice.
               </p>
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -182,8 +179,8 @@ export default function HomePage() {
         <section className="py-24">
           <div className="mx-auto max-w-6xl px-6">
             <div className="mb-16 text-center">
-              <h2 className="mb-4 text-3xl font-bold">How it works</h2>
-              <p className="text-lg text-muted-foreground">Three simple steps to a published blog post.</p>
+              <h2 className="mb-4 text-3xl font-bold font-heading">How it works</h2>
+              <p className="text-lg text-muted-foreground">A thoughtful process from expertise to published post.</p>
             </div>
             <div className="grid gap-8 md:grid-cols-3">
               {steps.map((step) => (
@@ -203,9 +200,9 @@ export default function HomePage() {
         <section className="border-t bg-muted/30 py-24">
           <div className="mx-auto max-w-6xl px-6">
             <div className="mb-16 text-center">
-              <h2 className="mb-4 text-3xl font-bold">Loved by therapists</h2>
+              <h2 className="mb-4 text-3xl font-bold font-heading">Trusted by health professionals</h2>
               <p className="text-lg text-muted-foreground">
-                Join hundreds of therapy practices growing with Fastr.
+                Clinicians who are growing their practices through consistent, credible content.
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-3">
@@ -214,7 +211,7 @@ export default function HomePage() {
                   <CardContent className="pt-6">
                     <div className="mb-4 flex gap-1">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-gold text-gold" />
+                        <Star key={i} className="h-4 w-4 fill-clay text-clay" />
                       ))}
                     </div>
                     <p className="mb-4 text-sm text-muted-foreground">&ldquo;{t.quote}&rdquo;</p>
@@ -233,14 +230,14 @@ export default function HomePage() {
         <section id="pricing" className="py-24">
           <div className="mx-auto max-w-6xl px-6">
             <div className="mb-16 text-center">
-              <h2 className="mb-4 text-3xl font-bold">Simple, transparent pricing</h2>
-              <p className="text-lg text-muted-foreground">Start free. Upgrade when you need more.</p>
+              <h2 className="mb-4 text-3xl font-bold font-heading">Choose your plan</h2>
+              <p className="text-lg text-muted-foreground">Start free. Grow at your own pace.</p>
             </div>
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-3 pt-4">
               {plans.map((plan) => (
                 <Card
                   key={plan.name}
-                  className={plan.popular ? "border-primary shadow-lg relative" : ""}
+                  className={plan.popular ? "border-primary shadow-lg relative overflow-visible" : ""}
                 >
                   {plan.popular && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
@@ -284,15 +281,16 @@ export default function HomePage() {
         {/* Final CTA */}
         <section className="border-t bg-primary/5 py-24">
           <div className="mx-auto max-w-3xl px-6 text-center">
-            <h2 className="mb-4 text-3xl font-bold">
-              Start attracting more clients today
+            <h2 className="mb-4 text-3xl font-bold font-heading">
+              Your clients are searching. Let them find you.
             </h2>
             <p className="mb-8 text-lg text-muted-foreground">
-              Join therapists who are growing their practices with consistent, SEO-optimized blog content.
+              Consistent, credible content builds the kind of trust that turns website visitors into clients.
+              Your practice grows because your voice is out there, working for you.
             </p>
             <Link href="/sign-up">
               <Button size="lg">
-                Get Started for Free
+                Start Publishing
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
@@ -305,9 +303,9 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-6 py-12">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <div>
-              <p className="text-lg font-bold text-primary">Fastr</p>
+              <p className="text-lg font-bold text-primary font-heading">Clarion</p>
               <p className="text-sm text-muted-foreground">
-                AI-powered blog writing for therapy practices.
+                Professional content for health professionals.
               </p>
             </div>
             <div className="flex gap-6 text-sm text-muted-foreground">
@@ -317,7 +315,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="mt-8 border-t pt-8 text-center text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} Fastr. All rights reserved.
+            &copy; {new Date().getFullYear()} Clarion. All rights reserved.
           </div>
         </div>
       </footer>

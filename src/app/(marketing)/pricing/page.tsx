@@ -7,7 +7,7 @@ const plans = [
   {
     name: "Free",
     price: "$0",
-    description: "Perfect for trying it out",
+    description: "A place to start",
     features: [
       "3 blog posts per month",
       "Short posts (500 words)",
@@ -15,38 +15,38 @@ const plans = [
       "5 saved posts",
       "1 practice profile",
     ],
-    cta: "Start Free",
+    cta: "Get Started",
     popular: false,
   },
   {
     name: "Pro",
     price: "$29",
-    description: "For active content creators",
+    description: "For consistent publishing",
     features: [
       "30 blog posts per month",
       "All post lengths (up to 1,500 words)",
       "Full SEO scoring & analysis",
       "Unlimited saved posts",
       "1 practice profile",
-      "Priority generation speed",
+      "Priority content creation",
     ],
-    cta: "Get Pro",
+    cta: "Choose Pro",
     popular: true,
   },
   {
     name: "Agency",
     price: "$79",
-    description: "For practices & group practices",
+    description: "For practices and groups",
     features: [
       "Unlimited blog posts",
       "All post lengths",
       "Full SEO scoring & analysis",
       "Unlimited saved posts",
       "5 practice profiles",
-      "Priority generation speed",
+      "Priority content creation",
       "Early access to new features",
     ],
-    cta: "Go Agency",
+    cta: "Choose Agency",
     popular: false,
   },
 ];
@@ -56,9 +56,9 @@ export default function PricingPage() {
     <div className="py-24">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-16 text-center">
-          <h1 className="mb-4 text-4xl font-bold">Simple, transparent pricing</h1>
+          <h1 className="mb-4 text-4xl font-bold font-heading">Choose your plan</h1>
           <p className="text-lg text-muted-foreground">
-            Start free. Upgrade when you need more. Cancel anytime.
+            Start free. Grow at your own pace. Cancel anytime.
           </p>
         </div>
 
@@ -102,10 +102,10 @@ export default function PricingPage() {
 
         <div className="mt-16 text-center">
           <p className="text-muted-foreground">
-            All plans include access to Claude AI for blog generation.
+            All plans include full access to our content creation tools.
             <br />
             Questions? Email us at{" "}
-            <span className="text-foreground font-medium">support@fastr.app</span>
+            <span className="text-foreground font-medium">support@clarionwriter.com</span>
           </p>
         </div>
       </div>
