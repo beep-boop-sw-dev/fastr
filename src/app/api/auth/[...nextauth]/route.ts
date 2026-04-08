@@ -3,15 +3,21 @@ import { getAuthOptions } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-// Wrap in a function so NextAuth + PrismaClient are not constructed at build time.
-function handler() {
-  return NextAuth(getAuthOptions());
+// Lazily create the NextAuth handler to avoid PrismaClient construction at build time.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _handler: any;
+
+function getHandler() {
+  if (!_handler) {
+    _handler = NextAuth(getAuthOptions());
+  }
+  return _handler;
 }
 
-export async function GET(req: Request) {
-  return handler()(req as any);
+export async function GET(...args: any[]) {
+  return getHandler()(...args);
 }
 
-export async function POST(req: Request) {
-  return handler()(req as any);
+export async function POST(...args: any[]) {
+  return getHandler()(...args);
 }
