@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import ReactMarkdown from "react-markdown";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +9,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { useGeneration } from "@/hooks/use-generation";
 import { scoreSEO } from "@/lib/seo-scorer";
 import { SPECIALTIES, TONES, AUDIENCES, POST_LENGTHS } from "@/lib/constants";
@@ -18,13 +16,12 @@ import type { GenerateRequest, PracticeInfoData } from "@/types";
 import {
   Loader2,
   Sparkles,
-  Copy,
-  Save,
-  RotateCcw,
   ChevronDown,
   ChevronUp,
   X,
   Plus,
+  FileText,
+  ArrowRight,
 } from "lucide-react";
 
 export default function GeneratePage() {
@@ -50,6 +47,7 @@ export default function GeneratePage() {
   const [wordCount, setWordCount] = useState(1000);
   const [callToAction, setCallToAction] = useState("");
   const [saving, setSaving] = useState(false);
+  const [savedPostId, setSavedPostId] = useState<string | null>(null);
 
   // Load practice info
   useEffect(() => {
@@ -70,7 +68,14 @@ export default function GeneratePage() {
       .catch(() => {});
   }, []);
 
-  // SEO score (computed from generated content)
+  // Auto-save when generation completes
+  useEffect(() => {
+    if (content && !isGenerating && !savedPostId && !saving) {
+      handleSave();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isGenerating]);
+
   const seoScore = useMemo(() => {
     if (!content || !primaryKeyword) return null;
     return scoreSEO(content, primaryKeyword);
@@ -100,6 +105,9 @@ export default function GeneratePage() {
       return;
     }
 
+    // Reset any previous saved state
+    setSavedPostId(null);
+
     const input: GenerateRequest = {
       practiceName: practiceName || undefined,
       city: city || undefined,
@@ -122,14 +130,10 @@ export default function GeneratePage() {
     if (!content) return;
     setSaving(true);
 
-    // Extract title from content
     const titleMatch = content.match(/^#\s+(.+)$/m);
     const title = titleMatch ? titleMatch[1] : topic;
-
-    // Extract meta description
     const metaMatch = content.match(/^META:\s*(.+)$/m);
     const metaDescription = metaMatch ? metaMatch[1] : undefined;
-
     const actualWordCount = content.split(/\s+/).filter(Boolean).length;
 
     try {
@@ -157,8 +161,8 @@ export default function GeneratePage() {
       if (!res.ok) throw new Error("Failed to save");
 
       const post = await res.json();
+      setSavedPostId(post.id);
       toast.success("Post saved!");
-      router.push(`/posts/${post.id}`);
     } catch {
       toast.error("Failed to save post");
     } finally {
@@ -166,11 +170,122 @@ export default function GeneratePage() {
     }
   }
 
-  function handleCopy() {
-    navigator.clipboard.writeText(content);
-    toast.success("Copied to clipboard!");
+  function handleNewPost() {
+    reset();
+    setSavedPostId(null);
+    setTopic("");
+    setPrimaryKeyword("");
+    setSecondaryKeywords([]);
+    setCallToAction("");
   }
 
+  // --- GENERATING STATE: full-width progress ---
+  if (isGenerating) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold font-heading">Creating Your Post</h1>
+          <p className="text-muted-foreground">Writing about: {topic}</p>
+        </div>
+
+        <Card>
+          <CardContent className="py-12">
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              </div>
+              <div className="text-center">
+                <p className="font-medium">Crafting your content...</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {content.split(/\s+/).filter(Boolean).length} words written
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // --- COMPLETED STATE: show saved post card ---
+  if (savedPostId && content && !isGenerating) {
+    const titleMatch = content.match(/^#\s+(.+)$/m);
+    const postTitle = titleMatch ? titleMatch[1] : topic;
+    const postWordCount = content.split(/\s+/).filter(Boolean).length;
+
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold font-heading">Post Created</h1>
+          <p className="text-muted-foreground">Your content is ready to review.</p>
+        </div>
+
+        <Card
+          className="group cursor-pointer transition-colors hover:border-primary/50"
+          onClick={() => router.push(`/posts/${savedPostId}`)}
+        >
+          <CardContent className="flex items-center gap-4 py-6">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+              <FileText className="h-6 w-6 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="font-semibold truncate">{postTitle}</h2>
+              <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+                <Badge variant="secondary">Draft</Badge>
+                <span>{postWordCount} words</span>
+                {seoScore && (
+                  <span className={
+                    seoScore.overall >= 80 ? "text-green-600" :
+                    seoScore.overall >= 60 ? "text-yellow-600" : "text-red-600"
+                  }>
+                    SEO: {seoScore.overall}/100
+                  </span>
+                )}
+                <span>{primaryKeyword}</span>
+              </div>
+            </div>
+            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+          </CardContent>
+        </Card>
+
+        <div className="flex gap-3">
+          <Button onClick={handleNewPost}>
+            <Sparkles className="mr-2 h-4 w-4" />
+            Create Another Post
+          </Button>
+          <Button variant="outline" onClick={() => router.push("/posts")}>
+            View All Posts
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // --- ERROR STATE ---
+  if (error && !content) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold font-heading">Create New Post</h1>
+          <p className="text-muted-foreground">Share your expertise with the people who need it most.</p>
+        </div>
+        <Card>
+          <CardContent className="py-8">
+            <div className="flex flex-col items-center gap-3 text-center">
+              <div className="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {error}
+              </div>
+              <Button variant="outline" onClick={handleNewPost}>
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // --- DEFAULT: Input Form ---
   return (
     <div className="space-y-6">
       <div>
@@ -178,345 +293,239 @@ export default function GeneratePage() {
         <p className="text-muted-foreground">Share your expertise with the people who need it most.</p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
-        {/* Input Form */}
-        <div className="space-y-6">
-          {/* Practice Info (Collapsible) */}
-          <Card>
-            <CardHeader
-              className="cursor-pointer"
-              onClick={() => setShowPracticeFields(!showPracticeFields)}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-base">Practice Information</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {practiceInfo?.practiceName
-                      ? `Pre-filled from settings: ${practiceInfo.practiceName}`
-                      : "Add your practice details for local reach"}
-                  </p>
-                </div>
-                {showPracticeFields ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </div>
-            </CardHeader>
-            {showPracticeFields && (
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="practiceName">Practice Name</Label>
-                  <Input
-                    id="practiceName"
-                    placeholder="e.g., Serenity Counseling Center"
-                    value={practiceName}
-                    onChange={(e) => setPracticeName(e.target.value)}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City</Label>
-                    <Input
-                      id="city"
-                      placeholder="e.g., Austin"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="state">State</Label>
-                    <Input
-                      id="state"
-                      placeholder="e.g., Texas"
-                      value={state}
-                      onChange={(e) => setState(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="neighborhood">Neighborhood (optional)</Label>
-                  <Input
-                    id="neighborhood"
-                    placeholder="e.g., East Side, Downtown"
-                    value={neighborhood}
-                    onChange={(e) => setNeighborhood(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Specialties</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {SPECIALTIES.map((s) => (
-                      <Badge
-                        key={s}
-                        variant={specialties.includes(s) ? "default" : "outline"}
-                        className="cursor-pointer"
-                        onClick={() => toggleSpecialty(s)}
-                      >
-                        {s}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            )}
-          </Card>
-
-          {/* Blog Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Blog Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="topic">Blog Topic / Title *</Label>
-                <Input
-                  id="topic"
-                  placeholder="e.g., How to Manage Anxiety During the Holidays"
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="primaryKeyword">Primary SEO Keyword *</Label>
-                <Input
-                  id="primaryKeyword"
-                  placeholder="e.g., anxiety therapist Austin"
-                  value={primaryKeyword}
-                  onChange={(e) => setPrimaryKeyword(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Secondary Keywords</Label>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Add a keyword and press Enter"
-                    value={newKeyword}
-                    onChange={(e) => setNewKeyword(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleAddKeyword();
-                      }
-                    }}
-                  />
-                  <Button type="button" variant="outline" size="icon" onClick={handleAddKeyword}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-                {secondaryKeywords.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {secondaryKeywords.map((kw) => (
-                      <Badge key={kw} variant="secondary" className="gap-1">
-                        {kw}
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() => handleRemoveKeyword(kw)}
-                        />
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Tone & Audience */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Tone & Audience</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Writing Tone</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {TONES.map((t) => (
-                    <button
-                      key={t.value}
-                      type="button"
-                      onClick={() => setTone(t.value)}
-                      className={`rounded-lg border p-3 text-left transition-colors ${
-                        tone === t.value
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                    >
-                      <p className="text-sm font-medium">{t.label}</p>
-                      <p className="text-xs text-muted-foreground">{t.description}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Target Audience</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {AUDIENCES.map((a) => (
-                    <button
-                      key={a.value}
-                      type="button"
-                      onClick={() => setTargetAudience(a.value)}
-                      className={`rounded-lg border p-3 text-left transition-colors ${
-                        targetAudience === a.value
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                    >
-                      <p className="text-sm font-medium">{a.label}</p>
-                      <p className="text-xs text-muted-foreground">{a.description}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Post Length</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {POST_LENGTHS.map((l) => (
-                    <button
-                      key={l.value}
-                      type="button"
-                      onClick={() => setWordCount(l.value)}
-                      className={`rounded-lg border p-3 text-center transition-colors ${
-                        wordCount === l.value
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                    >
-                      <p className="text-sm font-medium">{l.label}</p>
-                      <p className="text-xs text-muted-foreground">{l.description}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="cta">Call to Action</Label>
-                <Textarea
-                  id="cta"
-                  placeholder="e.g., Schedule a free 15-minute consultation call today"
-                  value={callToAction}
-                  onChange={(e) => setCallToAction(e.target.value)}
-                  rows={2}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Generate Button */}
-          <Button
-            size="lg"
-            className="w-full"
-            onClick={handleGenerate}
-            disabled={isGenerating || !topic.trim() || !primaryKeyword.trim()}
+      <div className="max-w-2xl space-y-6">
+        {/* Practice Info (Collapsible) */}
+        <Card>
+          <CardHeader
+            className="cursor-pointer"
+            onClick={() => setShowPracticeFields(!showPracticeFields)}
           >
-            {isGenerating ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="mr-2 h-5 w-5" />
-                Create Post
-              </>
-            )}
-          </Button>
-        </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-base">Practice Information</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {practiceInfo?.practiceName
+                    ? `Pre-filled from settings: ${practiceInfo.practiceName}`
+                    : "Add your practice details for local reach"}
+                </p>
+              </div>
+              {showPracticeFields ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </div>
+          </CardHeader>
+          {showPracticeFields && (
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="practiceName">Practice Name</Label>
+                <Input
+                  id="practiceName"
+                  placeholder="e.g., Serenity Counseling Center"
+                  value={practiceName}
+                  onChange={(e) => setPracticeName(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    placeholder="e.g., Austin"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="state">State</Label>
+                  <Input
+                    id="state"
+                    placeholder="e.g., Texas"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="neighborhood">Neighborhood (optional)</Label>
+                <Input
+                  id="neighborhood"
+                  placeholder="e.g., East Side, Downtown"
+                  value={neighborhood}
+                  onChange={(e) => setNeighborhood(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Specialties</Label>
+                <div className="flex flex-wrap gap-2">
+                  {SPECIALTIES.map((s) => (
+                    <Badge
+                      key={s}
+                      variant={specialties.includes(s) ? "default" : "outline"}
+                      className="cursor-pointer"
+                      onClick={() => toggleSpecialty(s)}
+                    >
+                      {s}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          )}
+        </Card>
 
-        {/* Output Panel */}
-        <div className="space-y-4">
-          {/* SEO Score */}
-          {seoScore && !isGenerating && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">SEO Score</CardTitle>
-                  <span
-                    className={`text-2xl font-bold ${
-                      seoScore.overall >= 80
-                        ? "text-green-600"
-                        : seoScore.overall >= 60
-                          ? "text-yellow-600"
-                          : "text-red-600"
+        {/* Blog Details */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Blog Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="topic">Blog Topic / Title *</Label>
+              <Input
+                id="topic"
+                placeholder="e.g., How to Manage Anxiety During the Holidays"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="primaryKeyword">Primary SEO Keyword *</Label>
+              <Input
+                id="primaryKeyword"
+                placeholder="e.g., anxiety therapist Austin"
+                value={primaryKeyword}
+                onChange={(e) => setPrimaryKeyword(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Secondary Keywords</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Add a keyword and press Enter"
+                  value={newKeyword}
+                  onChange={(e) => setNewKeyword(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddKeyword();
+                    }
+                  }}
+                />
+                <Button type="button" variant="outline" size="icon" onClick={handleAddKeyword}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              {secondaryKeywords.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {secondaryKeywords.map((kw) => (
+                    <Badge key={kw} variant="secondary" className="gap-1">
+                      {kw}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => handleRemoveKeyword(kw)}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tone & Audience */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Tone & Audience</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Writing Tone</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {TONES.map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => setTone(t.value)}
+                    className={`rounded-lg border p-3 text-left transition-colors ${
+                      tone === t.value
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
                     }`}
                   >
-                    {seoScore.overall}/100
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {seoScore.checks.map((check) => (
-                    <div key={check.name} className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">{check.name}</span>
-                      <span
-                        className={
-                          check.status === "good"
-                            ? "text-green-600"
-                            : check.status === "warning"
-                              ? "text-yellow-600"
-                              : "text-red-600"
-                        }
-                      >
-                        {check.score}/{check.maxScore}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Generated Content */}
-          <Card className="sticky top-8">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Generated Content</CardTitle>
-                {content && !isGenerating && (
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" onClick={handleCopy} title="Copy to clipboard">
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={handleSave} disabled={saving} title="Save as draft">
-                      {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={reset} title="Clear and start over">
-                      <RotateCcw className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
+                    <p className="text-sm font-medium">{t.label}</p>
+                    <p className="text-xs text-muted-foreground">{t.description}</p>
+                  </button>
+                ))}
               </div>
-            </CardHeader>
-            <CardContent>
-              {error && (
-                <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
-              )}
-              {!content && !isGenerating && !error && (
-                <p className="text-center text-sm text-muted-foreground py-12">
-                  Fill in the details and click &quot;Create Post&quot; to get started.
-                </p>
-              )}
-              {(content || isGenerating) && (
-                <div className="prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-foreground/90 prose-a:text-primary">
-                  <ReactMarkdown>{content}</ReactMarkdown>
-                  {isGenerating && (
-                    <span className="inline-block h-4 w-1 animate-pulse bg-primary" />
-                  )}
-                </div>
-              )}
-              {content && !isGenerating && (
-                <>
-                  <Separator className="my-4" />
-                  <p className="text-xs text-muted-foreground">
-                    {content.split(/\s+/).filter(Boolean).length} words
-                    {seoScore && ` \u2022 SEO Score: ${seoScore.overall}/100`}
-                  </p>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Target Audience</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {AUDIENCES.map((a) => (
+                  <button
+                    key={a.value}
+                    type="button"
+                    onClick={() => setTargetAudience(a.value)}
+                    className={`rounded-lg border p-3 text-left transition-colors ${
+                      targetAudience === a.value
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <p className="text-sm font-medium">{a.label}</p>
+                    <p className="text-xs text-muted-foreground">{a.description}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Post Length</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {POST_LENGTHS.map((l) => (
+                  <button
+                    key={l.value}
+                    type="button"
+                    onClick={() => setWordCount(l.value)}
+                    className={`rounded-lg border p-3 text-center transition-colors ${
+                      wordCount === l.value
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <p className="text-sm font-medium">{l.label}</p>
+                    <p className="text-xs text-muted-foreground">{l.description}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cta">Call to Action</Label>
+              <Textarea
+                id="cta"
+                placeholder="e.g., Schedule a free 15-minute consultation call today"
+                value={callToAction}
+                onChange={(e) => setCallToAction(e.target.value)}
+                rows={2}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Generate Button */}
+        <Button
+          size="lg"
+          className="w-full"
+          onClick={handleGenerate}
+          disabled={isGenerating || !topic.trim() || !primaryKeyword.trim()}
+        >
+          <Sparkles className="mr-2 h-5 w-5" />
+          Create Post
+        </Button>
       </div>
     </div>
   );
