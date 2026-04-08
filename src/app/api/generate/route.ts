@@ -121,6 +121,7 @@ export async function POST(req: Request) {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, tokens: totalTokens })}\n\n`));
           controller.close();
         } catch (error) {
+          console.error("Stream generation error:", error);
           controller.enqueue(
             encoder.encode(`data: ${JSON.stringify({ error: "Generation failed. Please try again." })}\n\n`)
           );
@@ -143,6 +144,7 @@ export async function POST(req: Request) {
         headers: { "Content-Type": "application/json" },
       });
     }
+    console.error("Generate route error:", error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
