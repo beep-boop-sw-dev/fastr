@@ -39,6 +39,13 @@ export async function POST(req: Request) {
       select: { stripePriceId: true, stripeCurrentPeriodEnd: true },
     });
 
+    console.log("Plan debug:", {
+      userPriceId: user?.stripePriceId,
+      envAgency: process.env.STRIPE_AGENCY_PRICE_ID,
+      envPro: process.env.STRIPE_PRO_PRICE_ID,
+      match: user?.stripePriceId === process.env.STRIPE_AGENCY_PRICE_ID,
+    });
+
     const plan = user?.stripePriceId === process.env.STRIPE_AGENCY_PRICE_ID
       ? PLANS.agency
       : user?.stripePriceId === process.env.STRIPE_PRO_PRICE_ID
