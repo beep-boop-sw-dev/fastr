@@ -9,7 +9,7 @@ function getResend(): Resend {
   return _resend;
 }
 
-const FROM_EMAIL = process.env.EMAIL_FROM || "Clarion <noreply@clarionwriter.com>";
+const FROM_EMAIL = process.env.EMAIL_FROM || "Clarion <onboarding@resend.dev>";
 
 export async function sendPasswordResetEmail(email: string, token: string) {
   const baseUrl = process.env.NEXTAUTH_URL || "https://fastr-pi.vercel.app";
