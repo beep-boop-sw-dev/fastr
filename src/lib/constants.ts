@@ -72,3 +72,20 @@ export const PLANS = {
 } as const;
 
 export type PlanKey = keyof typeof PLANS;
+
+/** Resolve a user's stripePriceId to their plan. */
+export function getPlan(stripePriceId: string | null | undefined) {
+  if (!stripePriceId) return PLANS.free;
+
+  // Match by env var (real Stripe price IDs)
+  if (process.env.STRIPE_AGENCY_PRICE_ID && stripePriceId === process.env.STRIPE_AGENCY_PRICE_ID)
+    return PLANS.agency;
+  if (process.env.STRIPE_PRO_PRICE_ID && stripePriceId === process.env.STRIPE_PRO_PRICE_ID)
+    return PLANS.pro;
+
+  // Match by test/fallback convention
+  if (stripePriceId.includes("agency")) return PLANS.agency;
+  if (stripePriceId.includes("pro")) return PLANS.pro;
+
+  return PLANS.free;
+}

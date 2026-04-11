@@ -6,7 +6,7 @@ import { getAuthOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { streamBlogGeneration } from "@/lib/claude";
 import { buildSystemPrompt, buildUserPrompt } from "@/lib/prompts";
-import { PLANS } from "@/lib/constants";
+import { PLANS, getPlan } from "@/lib/constants";
 
 const generateSchema = z.object({
   practiceName: z.string().optional(),
@@ -39,18 +39,7 @@ export async function POST(req: Request) {
       select: { stripePriceId: true, stripeCurrentPeriodEnd: true },
     });
 
-    console.log("Plan debug:", {
-      userPriceId: user?.stripePriceId,
-      envAgency: process.env.STRIPE_AGENCY_PRICE_ID,
-      envPro: process.env.STRIPE_PRO_PRICE_ID,
-      match: user?.stripePriceId === process.env.STRIPE_AGENCY_PRICE_ID,
-    });
-
-    const plan = user?.stripePriceId === process.env.STRIPE_AGENCY_PRICE_ID
-      ? PLANS.agency
-      : user?.stripePriceId === process.env.STRIPE_PRO_PRICE_ID
-        ? PLANS.pro
-        : PLANS.free;
+    const plan = getPlan(user?.stripePriceId);
 
     const periodStart = user?.stripeCurrentPeriodEnd
       ? new Date(new Date(user.stripeCurrentPeriodEnd).getTime() - 30 * 24 * 60 * 60 * 1000)

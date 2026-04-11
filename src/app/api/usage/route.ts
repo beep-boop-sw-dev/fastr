@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 import { getAuthOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { PLANS } from "@/lib/constants";
+import { PLANS, getPlan } from "@/lib/constants";
 
 export async function GET() {
   const session = await getServerSession(getAuthOptions());
@@ -17,11 +17,7 @@ export async function GET() {
     select: { stripePriceId: true, stripeCurrentPeriodEnd: true },
   });
 
-  const plan = user?.stripePriceId === process.env.STRIPE_AGENCY_PRICE_ID
-    ? PLANS.agency
-    : user?.stripePriceId === process.env.STRIPE_PRO_PRICE_ID
-      ? PLANS.pro
-      : PLANS.free;
+  const plan = getPlan(user?.stripePriceId);
 
   const periodStart = user?.stripeCurrentPeriodEnd
     ? new Date(new Date(user.stripeCurrentPeriodEnd).getTime() - 30 * 24 * 60 * 60 * 1000)
